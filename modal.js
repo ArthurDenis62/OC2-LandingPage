@@ -48,44 +48,57 @@ function validate(event) {
         element.textContent = "";
     });
 
+    let isValid = true;
+
     // Vérification et validation du champ Prénom
     if (firstName.value.trim() === "" || firstName.value.length < 2) {
         document.getElementById("first-error").textContent = "Le champ Prénom doit avoir au moins 2 caractères.";
-        return false;
+        isValid = false;
     }
     // Vérification et validation du champ Nom de famille
     if (lastName.value.trim() === "" || lastName.value.length < 2) {
         document.getElementById("last-error").textContent = "Le champ Nom de famille doit avoir au moins 2 caractères.";
-        return false;
+        isValid = false;
     }
     // Vérification et validation de l'adresse mail
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     if (!emailRegex.test(email.value)) {
         document.getElementById("email-error").textContent = "L'adresse mail saisie n'est pas valide.";
-        return false;
+        isValid = false;
     }
     // Vérification et validation de la date d'anniversaire
-    if (birthdate.value.trim() === "") {
+    const birthdateRegex = /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/;
+    if (!birthdateRegex.test(birthdate.value)) {
         document.getElementById("birthdate-error").textContent = "Le champ Date de naissance ne doit pas être vide.";
-        return false;
+        isValid = false;
+    }
+    const minimalAge = 15;
+    const isAgeOk = checkAge(birthdate.value, minimalAge)
+    if(!isAgeOk){
+        document.getElementById("birthdate-error").textContent = `Il faut avoir plus de ${minimalAge} ans`;
+        isValid = false
     }
     // Vérification et validation du nombre de concours
     const quantityValue = parseInt(quantity.value, 10);
     if (isNaN(quantityValue) || quantityValue < 0 || quantityValue > 99) {
         document.getElementById("quantity-error").textContent = "Le nombre de concours doit être une valeur numérique.";
-        return false;
+        isValid = false;
     }
     // Vérification et validation de la sélection d'un emplacement
     if (!location) {
         document.getElementById("location-error").textContent = "Veuillez sélectionner un emplacement.";
-        return false;
+        isValid = false;
     }
     // Vérification et validation de la case des conditions générales
     if (!checkbox1.checked) {
         document.getElementById("checkbox1-error").textContent = "Vous devez accepter les conditions générales.";
-        return false;
+        isValid = false;
     }
 
+    if (!isValid) {
+        return false;
+    }
+    
     //Message de confirmation de réservation
     const confirmationMessage = document.getElementById("confirmation-message");
     confirmationMessage.textContent = "Merci ! Votre réservation a été reçue.";
@@ -96,6 +109,8 @@ function validate(event) {
 
     // Appel fonction pour ouvrir le modal de validation
     openConfirmationModal();
+
+    document.getElementById("reserve").reset();
 
     return true;
 }
@@ -110,4 +125,14 @@ function openConfirmationModal() {
 function closeConfirmationModal() {
     const confirmationModal = document.getElementById("confirmation-modal");
     confirmationModal.style.display = "none";
+}
+
+function checkAge(date, reference){
+    const input = new Date(date)
+    const birthMoreReference = new Date(input.getFullYear() + parseInt(reference), input.getMonth() -1 , input.getDay())
+    const now = new Date()
+    if(birthMoreReference < now) {
+        return true
+    }
+    return false
 }
